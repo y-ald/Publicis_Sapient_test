@@ -1,8 +1,4 @@
-package org.mowItNow.models;
-
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+package org.mowItNow.mower.models;
 
 import java.util.UUID;
 
@@ -52,6 +48,8 @@ public class Mower {
             case W:
                 orientation = Orientation.N;
                 break;
+            default:
+                throw new IllegalArgumentException("Invalid orientation: " + orientation);
         }
     }
 
@@ -69,10 +67,13 @@ public class Mower {
             case E:
                 orientation = Orientation.N;
                 break;
+            default:
+                throw new IllegalArgumentException("Invalid orientation: " + orientation);
         }
     }
 
     public void moveForward() {
+        checkPositionmoveForward();
         switch (orientation) {
             case N:
                 if (yPosition < maxY) yPosition++;
@@ -86,10 +87,13 @@ public class Mower {
             case W:
                 if (xPosition > 0) xPosition--;
                 break;
+            default:
+                throw new IllegalArgumentException("Invalid orientation: " + orientation);
         }
     }
 
     public void moveBackward() {
+        checkPositionmoveBackward();
         switch (orientation) {
             case N:
                 if (yPosition > 0) yPosition--;
@@ -103,6 +107,8 @@ public class Mower {
             case W:
                 if (xPosition < maxX) xPosition++;
                 break;
+            default:
+                throw new IllegalArgumentException("Invalid orientation: " + orientation);
         }
     }
 
@@ -130,8 +136,46 @@ public class Mower {
         return maxY;
     }
 
+    private void checkPositionmoveForward() {
+        switch (orientation) {
+            case N:
+                if (yPosition >= maxY) throw new RuntimeException(STR."the dimensions of the lawn have been exceeded on the Y axis \{maxY}");
+                break;
+            case E:
+                if (xPosition >= maxX) throw new RuntimeException(STR."the dimensions of the lawn have been exceeded on the X axis \{maxX}");
+                break;
+            case S:
+                if (yPosition <= 0) throw new RuntimeException("the dimensions of the lawn have been exceeded on the Y axis");
+                break;
+            case W:
+                if (xPosition <= 0) throw new RuntimeException("the dimensions of the lawn have been exceeded on the X axis");
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid orientation: " + orientation);
+        }
+    }
+
+    private void checkPositionmoveBackward() {
+        switch (orientation) {
+            case N:
+                if (yPosition <= 0) throw new RuntimeException("the dimensions of the lawn have been exceeded on the Y axis");
+                break;
+            case E:
+                if (xPosition <= 0) throw new RuntimeException("the dimensions of the lawn have been exceeded on the X axis");
+                break;
+            case S:
+                if (yPosition >= maxY) throw new RuntimeException(STR."the dimensions of the lawn have been exceeded on the Y axis \{maxY}");
+                break;
+            case W:
+                if (xPosition >= maxX) throw new RuntimeException(STR."the dimensions of the lawn have been exceeded on the X axis \{maxX}");
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid orientation: " + orientation);
+        }
+    }
+
     @Override
     public String toString() {
-        return "This Mower is id:" + id + " and has position x: "+ xPosition + " y: "+ yPosition + " Orientation: " + orientation.toString();
+        return xPosition + " " + yPosition + " " + orientation.toString();
     }
 }

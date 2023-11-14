@@ -1,4 +1,4 @@
-package org.mowItNow.models;
+package org.mowItNow.mower.models;
 
 public enum InstructionEnum {
     A,B,D,G;
