@@ -1,12 +1,11 @@
 package org.mowItNow.mower.service;
 
-import java.nio.file.Path;
 import java.util.List;
 
 public interface MowerService {
 
-    void executeMowerTask(Path filePath);
+    void executeMowerTask(String fileName);
 
-    void executeAllMowerTask(List<Path> filesPath);
+    void executeAllMowerTask(List<String> fileNames);
 
 }

@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -27,8 +26,8 @@ public class MowerServiceImpl implements MowerService {
     }
 
     @Override
-    public void executeMowerTask(Path filePath) {
-        List<MowerTask> mowerTasks = mowerDao.getAllMowerTasks(filePath);
+    public void executeMowerTask(String fileName) {
+        List<MowerTask> mowerTasks = mowerDao.getAllMowerTasks(fileName);
         Consumer<MowerTask> runMowerTask = (mowerTask) -> {
            String initialPositions = mowerTask.mower().toString();
             mowerTask.instructions().chars()
@@ -38,7 +37,7 @@ public class MowerServiceImpl implements MowerService {
                         processInstructions(mowerTask.mower(), instruction);
                     });
             System.out.println();
-            System.out.println(STR."Config file \{filePath.getFileName()} - Mower final position for instruction \{mowerTask.instructions()} and initial positon \{initialPositions}");
+            System.out.println(STR."Config file \{fileName} - Mower final position for instruction \{mowerTask.instructions()} and initial positon \{initialPositions}");
             System.out.println(STR."Mower final position \{mowerTask.mower().toString()}");
         };
         mowerTasks.forEach(runMowerTask);
@@ -48,17 +47,17 @@ public class MowerServiceImpl implements MowerService {
                 .map(MowerTask::mower)
                 .map(Mower::toString)
                 .collect(Collectors.joining("\n"));
-        mowerDao.save(content, filePath.getFileName());
+        mowerDao.save(content, fileName);
     }
 
     @Override
-    public void executeAllMowerTask(List<Path> filesPath) {
+    public void executeAllMowerTask(List<String> fileNames) {
         try {
             // Create a fixed thread pool
-            ExecutorService executor = Executors.newFixedThreadPool(Math.min(filesPath.size(), 10));
+            ExecutorService executor = Executors.newFixedThreadPool(Math.min(fileNames.size(), 10));
 
-            List<CompletableFuture<Void>> futures = filesPath.stream()
-                    .map(path -> CompletableFuture.runAsync(() -> executeMowerTask(path), executor))
+            List<CompletableFuture<Void>> futures = fileNames.stream()
+                    .map(fileName -> CompletableFuture.runAsync(() -> executeMowerTask(fileName), executor))
                     .collect(Collectors.toList());
             CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
             allOf.get();

@@ -1,43 +1,59 @@
 package org.mowItNow;
 
-import org.mowItNow.mower.service.MowerServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.*;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Scanner;
 
 public class Utils {
     private static Logger logger = LoggerFactory.getLogger(Utils.class);
 
-    public static List<Path> getFilesFromResources(String folderPath) throws IOException, URISyntaxException {
-        // Use the ClassLoader to obtain resources from the classpath
-        ClassLoader classLoader = Utils.class.getClassLoader();
-        URL resourceUrl = Objects.requireNonNull(classLoader.getResource(folderPath));
+    public static List<String> readContent(String fileName) {
+        String folder = "mowerTasksConfigurations";
+        InputStream fileStream = Utils.class.getClassLoader().getResourceAsStream(STR."\{folder}/\{fileName}");
+        List<String> content =  new ArrayList<>();
 
-        Path folderPathInResources = Paths.get(resourceUrl.toURI());
-        return Files.walk(folderPathInResources)
-                .filter(Files::isRegularFile)
-                .collect(Collectors.toList());
+        logger.debug(STR."Content of file \{fileName} ");
+        try (Scanner scanner = new Scanner(fileStream)) {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                content.add(line);
+            }
+        } catch (Exception e) {
+            logger.error(STR."There is an issue when reading the file  \{fileName}" );
+        }
+        return content;
     }
 
-    public static void writeToFile(File filePath, String content) throws IOException {
+    public static List<String> getFilesFromResources(String folderPath) {
+        InputStream folderStream = Utils.class.getClassLoader().getResourceAsStream(folderPath);
+
+        List<String> fileNames = new ArrayList<>();
+
+        try (Scanner scanner = new Scanner(folderStream)) {
+            while (scanner.hasNextLine()) {
+                String fileName = scanner.nextLine();
+                fileNames.add(fileName);
+            }
+        } catch (Exception e) {
+            logger.error(STR."There was an issue when reading folder \{ folderPath }" , e);
+
+        }
+
+        return fileNames;
+    }
+
+    public static void writeToFile(String fileName, String content) throws IOException {
         // Create a FileWriter and write content to the file
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(Paths.get(fileName).toFile()))) {
             writer.write(content);
         } catch (IOException e) {
-            logger.error(STR. "There was an issue wirtting result of \{ filePath }" , e);
+            logger.error(STR."There was an issue wirtting result of \{ fileName }" , e);
         }
-        logger.info(STR. "File written to: \{ filePath }" );
+        logger.info(STR."File written to: \{ fileName }" );
     }
 }

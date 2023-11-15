@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,8 +40,9 @@ public class MowerScreen {
         }
     }
 
-    private void initializeMenu() throws IOException, URISyntaxException  {
-        List<Path> configFiles = Utils.getFilesFromResources("mowerTasksConfigurations");
+    private void initializeMenu() {
+        String folder = "mowerTasksConfigurations";
+        List<String> fileNames = Utils.getFilesFromResources(folder);
         int filte_index = 1;
 
         System.out.println();
@@ -50,13 +50,13 @@ public class MowerScreen {
         System.out.println("\n");
         System.out.println("Choose from these choices, the config to run: ");
         System.out.println("-------------------------\n");
-        for(Path filePath: configFiles) {
-            menuOptions.put(filte_index, () -> mowerService.executeMowerTask(filePath));
-            System.out.println(filte_index+ " - " + filePath.getFileName().toString().split("\\.")[0]);
+        for(String fileName: fileNames) {
+            menuOptions.put(filte_index, () -> mowerService.executeMowerTask(fileName));
+            System.out.println(filte_index+ " - " + fileName.split("\\.")[0]);
             filte_index ++;
         }
         System.out.println(filte_index + " - Run all the configurations" );
-        menuOptions.put(filte_index, () -> mowerService.executeAllMowerTask(configFiles));
+        menuOptions.put(filte_index, () -> mowerService.executeAllMowerTask(fileNames));
         menuOptions.put( filte_index + 1, () -> {
             logger.info("Exiting the program. Goodbye!");
             System.exit(0);

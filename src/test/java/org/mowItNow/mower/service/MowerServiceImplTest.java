@@ -13,8 +13,6 @@ import org.mowItNow.mower.persistence.MowerDao;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
@@ -71,12 +69,12 @@ public class MowerServiceImplTest {
     void executeMowerTask_Given_mowerTasks_should_call_save_with_mower_final_position(){
         // GIVEN
         Mockito.when(mowerDaoMock.getAllMowerTasks(Mockito.any())).thenReturn(mowerTasks);
-        Path path = Paths.get("test.txt");
+        String fileName = "test.txt";
         // WHEN
-        mowerService.executeMowerTask(path);
+        mowerService.executeMowerTask(fileName);
 
         ArgumentCaptor<String> contentCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<Path> pathCaptor = ArgumentCaptor.forClass(Path.class);
+        ArgumentCaptor<String> pathCaptor = ArgumentCaptor.forClass(String.class);
         verify(mowerDaoMock).save(contentCaptor.capture(), pathCaptor.capture());
         String contentCaptured = contentCaptor.getValue();
 
@@ -89,12 +87,13 @@ public class MowerServiceImplTest {
     void executeMowerTask_Given_empty_mowerTasks_should_call_save_with_empty_string(){
         // GIVEN
         Mockito.when(mowerDaoMock.getAllMowerTasks(Mockito.any())).thenReturn(List.of());
-        Path path = Paths.get("test.txt");
+        String fileName = "test.txt";
+
         // WHEN
-        mowerService.executeMowerTask(path);
+        mowerService.executeMowerTask(fileName);
 
         ArgumentCaptor<String> contentCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<Path> pathCaptor = ArgumentCaptor.forClass(Path.class);
+        ArgumentCaptor<String> pathCaptor = ArgumentCaptor.forClass(String.class);
         verify(mowerDaoMock).save(contentCaptor.capture(), pathCaptor.capture());
         String contentCaptured = contentCaptor.getValue();
 
@@ -106,19 +105,19 @@ public class MowerServiceImplTest {
     @DisplayName("Given mowerTask with wrong instruction should throw IllegalArgumentException")
     void executeMowerTask_Given_mowerg_Tasks_with_wrong_instruction_should_throw_IllegalArgumentException(){
         Mockito.when(mowerDaoMock.getAllMowerTasks(Mockito.any())).thenReturn(List.of(new MowerTask(mower3, "ZZZZZZZZZZ")));
-        Path path = Paths.get("test.txt");
+        String fileName = "test.txt";
 
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
-                . isThrownBy( () -> mowerService.executeMowerTask(path));
+                . isThrownBy( () -> mowerService.executeMowerTask(fileName));
     }
 
     @Test
     @DisplayName("Given mowerTask with incoherent instruction should throw RuntimeException")
     void executeMowerTask_Given_mowerg_Tasks_with_non_coherent_instruction_should_throw_RuntimeException(){
         Mockito.when(mowerDaoMock.getAllMowerTasks(Mockito.any())).thenReturn(List.of(new MowerTask(mower3, "AAAAAAAAAAAA")));
-        Path path = Paths.get("test.txt");
+        String fileName = "test.txt";
 
         Assertions.assertThatExceptionOfType(RuntimeException.class)
-                . isThrownBy( () -> mowerService.executeMowerTask(path));
+                . isThrownBy( () -> mowerService.executeMowerTask(fileName));
     }
 }
